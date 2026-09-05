@@ -2,10 +2,6 @@
 
 A deep learning project that classifies dermoscopic skin lesion images as **benign** or **malignant** (melanoma), comparing a custom CNN built from scratch against a transfer-learning approach using MobileNetV2.
 
-# Melanoma Skin Cancer Classification with CNNs
-
-A deep learning project that classifies dermoscopic skin lesion images as **benign** or **malignant** (melanoma), comparing a custom CNN built from scratch against a transfer-learning approach using MobileNetV2.
-
 
 ## Overview
 
