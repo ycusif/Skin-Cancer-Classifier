@@ -2,62 +2,97 @@
 
 A deep learning project that classifies dermoscopic skin lesion images as **benign** or **malignant** (melanoma), comparing a custom CNN built from scratch against a transfer-learning approach using MobileNetV2.
 
+# Melanoma Skin Cancer Classification with CNNs
+
+A deep learning project that classifies dermoscopic skin lesion images as **benign** or **malignant** (melanoma), comparing a custom CNN built from scratch against a transfer-learning approach using MobileNetV2.
+
+This was completed as a team project for the **Neural Networks (AI303)** course at **Pharos University in Alexandria**, Faculty of Computer Science & Artificial Intelligence, under Dr. Sahar Ghanem (TAs: Eng. Ramwan Gamal and Rewan Noor).
+
+## Team
+
+| Member | Contribution |
+|---|---|
+| Mohamed Adel Mohamed | Project setup, imports, dataset path setup, class counting, initial plots |
+| Mohamed Ashraf Mohamed | Data generators, augmentation, train/validation loaders |
+| Eltaib Tarek Eltaib | Sample visualization, CLAHE, full visualization section |
+| Naira Gamal | Architecture design, Experiment 1 model build & compilation, report finalization |
+| **Youssef Mohamed Amin** | **Experiment 1 training & evaluation (callbacks, training loop, model saving, confusion matrix), report finalization** |
+| Ahmed Mohamed Saad | Experiment 2 (Improved CNN) implementation, training, confusion matrix, classification report |
+| Mohamed Ehab Abdelnaby | Experiment 3 (MobileNetV2) model creation, training, metrics, final confusion matrix |
+
 ## Overview
 
-Melanoma is one of the most dangerous forms of skin cancer, and early detection significantly improves patient outcomes. This project explores whether convolutional neural networks can reliably distinguish malignant lesions from benign ones using the [Melanoma Skin Cancer Dataset of 10,000 Images](https://www.kaggle.com/datasets/hasnainjaved/melanoma-skin-cancer-dataset-of-10000-images) from Kaggle.
+Melanoma is one of the most aggressive forms of skin cancer, and early detection significantly improves survival outcomes. This project explores whether convolutional neural networks can reliably distinguish malignant lesions from benign ones using the [Melanoma Skin Cancer Dataset of 10,000 Images](https://www.kaggle.com/datasets/hasnainjaved/melanoma-skin-cancer-dataset-of-10000-images) from Kaggle.
 
-Three modeling experiments were run and compared on the same train/validation split:
+Three modeling experiments were run and compared:
 
 1. A baseline **vanilla CNN** built from scratch
-2. A **deeper CNN** with more filters and a smaller input resolution
+2. A **deeper "Improved" CNN** with more filters and a smaller input resolution
 3. **Transfer learning** with a frozen MobileNetV2 backbone
 
 ## Dataset
 
 - **Source:** Kaggle — Melanoma Skin Cancer Dataset of 10,000 Images
-- **Classes:** `benign` (5,000 images), `malignant` (4,605 images)
-- **Split used:** 80% train / 20% validation (7,684 / 1,921 images), plus a separate held-out test set
+- **Classes:** `benign` (~5,000 images), `malignant` (~4,600 images)
+- **Structure:** Folder-based, with separate training and testing directories
+- **Split used:** 80% train / 20% validation (1,921 validation images)
 - **Preprocessing:**
-  - Resized to 224×224 (150×150 for Experiment 2)
-  - Rescaled pixel values to [0, 1]
-  - Augmentation on the training set: rotation, width/height shift, zoom, horizontal flip
-  - CLAHE (Contrast Limited Adaptive Histogram Equalization) explored as an additional contrast-enhancement step
+  - Normalized to [0, 1] by dividing pixel values by 255
+  - Augmentation on the training set only: rotation (±20°), width/height shift (10%), zoom (10%), horizontal flip
+  - CLAHE (Contrast Limited Adaptive Histogram Equalization) applied to the luminance (Y) channel to improve local contrast and edge definition on lesions
 
 ## Repository Structure
 
 ```
 .
 ├── melanoma-skin-cancer-cnn.ipynb   # Full training & evaluation pipeline
-├── report.pdf                       # Written project report
+├── report.pdf                       # Full written project report
 └── LICENSE
 ```
 
 ## Methodology
 
 ### Experiment 1 — Vanilla CNN
-A 4-block convolutional network (32 → 64 → 128 → 256 filters) with max-pooling and progressively increasing dropout (0.25 → 0.3), trained for up to 50 epochs with early stopping, learning-rate reduction on plateau, and checkpointing on best validation accuracy.
+A 4-block convolutional network (32 → 64 → 128 → 256 filters), each followed by max-pooling and progressively increasing dropout (0.25 → 0.3), then a 256-unit dense layer (dropout 0.5) and a sigmoid output. Trained for up to 50 epochs with:
+- Adam optimizer (learning rate 0.0001), binary cross-entropy loss
+- `EarlyStopping` (patience 5, restores best weights)
+- `ModelCheckpoint` (saves best validation accuracy)
+- `ReduceLROnPlateau` (factor 0.2, patience 5, min LR 1e-5)
 
-### Experiment 2 — Deeper CNN
-A wider/deeper variant (64 → 128 → 256 → 512 filters) at a reduced 150×150 input resolution, intended to test whether additional capacity and a smaller input size would improve results.
+### Experiment 2 — Improved CNN
+A deeper variant (64 → up to 512 filters) at a reduced 150×150 input resolution with lighter dropout (0.15–0.20) and a 128-unit dense layer, aiming to test whether more capacity at lower resolution would improve results.
 
 ### Experiment 3 — MobileNetV2 Transfer Learning
-A MobileNetV2 backbone (ImageNet weights, frozen) with a custom classification head (batch normalization, dense layer, dropout, sigmoid output), trained for up to 20 epochs with early stopping.
-
-All experiments use binary cross-entropy loss, the Adam optimizer, and are evaluated with accuracy, precision, recall, F1-score, and confusion matrices.
+A MobileNetV2 backbone (ImageNet weights, frozen) with a custom classification head — batch normalization, a 512-unit dense layer, dropout (0.5), and a sigmoid output.
 
 ## Results
 
-| Experiment | Architecture | Validation Accuracy | Notes |
-|---|---|---|---|
-| 1 | Vanilla CNN (4-block) | **~91–92%** | Best-performing model; balanced precision/recall across both classes (F1 ≈ 0.91–0.92) |
-| 2 | Deeper CNN (150×150) | Not conclusively evaluated | Training loop reused the Experiment 1 model rather than the newly defined deeper model — see Known Issues |
-| 3 | MobileNetV2 (frozen) | Not conclusively evaluated | Same training-loop issue as Experiment 2 — see Known Issues |
+**Experiment 1 (Vanilla CNN)** — final validation metrics:
 
-The vanilla CNN from Experiment 1 was the only model verified to have trained and evaluated correctly, reaching approximately **92% test accuracy** with balanced performance across both benign and malignant classes.
+| Metric | Training | Validation |
+|---|---|---|
+| Accuracy | 92% | 91.25% |
+| Loss | 0.2326 | 0.2478 |
+
+Classification report (validation set):
+
+| Class | Precision | Recall | F1-score | Support |
+|---|---|---|---|---|
+| Benign | 0.92 | 0.92 | 0.92 | 1,000 |
+| Malignant | 0.91 | 0.91 | 0.91 | 921 |
+| **Overall accuracy** | | | **0.92** | 1,921 |
+
+Per the project report, the best recorded **test** accuracy across all experiments was **89%**, achieved by the Vanilla CNN.
+
+**Experiments 2 and 3** were affected by a coding bug (see below): `history_ex2` and `history_ex3` were assigned from `model.fit(...)` instead of `model_2.fit(...)` / `model_3.fit(...)`, so the recorded training/validation curves for those two experiments don't actually reflect their own models. The report notes the final architectures were built correctly and prediction-based evaluation was still carried out, but flags the Improved CNN's result as "less trustworthy" specifically because of the lost training history. The MobileNetV2 experiment is discussed as benefiting from pretrained ImageNet features, though given the shared bug, its reported per-epoch metrics should be read with the same caution.
 
 ## Known Issues
 
-While documenting this notebook, I found that the training calls for Experiments 2 and 3 (`model.fit(...)`) reference the original Experiment 1 model object instead of `model_2` and `model_3`. As a result, the deeper CNN and MobileNetV2 models were never actually trained, which explains their poor, near-random evaluation scores later in the notebook. This is a good next fix: updating those calls to `model_2.fit(...)` and `model_3.fit(...)` respectively should allow a fair comparison between all three architectures.
+The training calls for Experiments 2 and 3 reference the wrong model object (`model` instead of `model_2` / `model_3`), corrupting the recorded training history for those two runs. This is flagged directly in the report as a limitation. A good next step would be correcting these references and re-running Experiments 2 and 3 to get a clean, trustworthy three-way comparison.
+
+## Deployment
+
+A **Streamlit** web app was built on top of the trained model, letting a user upload a skin lesion image and get a real-time benign/malignant prediction with a confidence score — intended to demonstrate how this kind of model could support telemedicine or early screening in areas without easy access to dermatologists.
 
 ## Tech Stack
 
@@ -67,6 +102,7 @@ While documenting this notebook, I found that the training calls for Experiments
 - **Data Handling:** NumPy, Pandas
 - **Visualization:** Matplotlib, Seaborn
 - **Evaluation:** Scikit-learn (confusion matrix, classification report, accuracy score)
+- **Deployment:** Streamlit
 
 ## Running the Project
 
@@ -79,7 +115,12 @@ While documenting this notebook, I found that the training calls for Experiments
 
 ## Report
 
-See [`report.pdf`](./report.pdf) for the full written analysis and discussion of results.
+See [`report.pdf`](./report.pdf) for the full written analysis, architecture rationale, and discussion of results.
+
+## References
+
+- [Kaggle – Melanoma Skin Cancer Dataset](https://www.kaggle.com/datasets/hasnainjaved/melanoma-skin-cancer-dataset-of-10000-images)
+- [MobileNetV2](https://keras.io/api/applications/mobilenet/)
 
 ## License
 
