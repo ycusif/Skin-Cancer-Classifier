@@ -6,19 +6,6 @@ A deep learning project that classifies dermoscopic skin lesion images as **beni
 
 A deep learning project that classifies dermoscopic skin lesion images as **benign** or **malignant** (melanoma), comparing a custom CNN built from scratch against a transfer-learning approach using MobileNetV2.
 
-This was completed as a team project for the **Neural Networks (AI303)** course at **Pharos University in Alexandria**, Faculty of Computer Science & Artificial Intelligence, under Dr. Sahar Ghanem (TAs: Eng. Ramwan Gamal and Rewan Noor).
-
-## Team
-
-| Member | Contribution |
-|---|---|
-| Mohamed Adel Mohamed | Project setup, imports, dataset path setup, class counting, initial plots |
-| Mohamed Ashraf Mohamed | Data generators, augmentation, train/validation loaders |
-| Eltaib Tarek Eltaib | Sample visualization, CLAHE, full visualization section |
-| Naira Gamal | Architecture design, Experiment 1 model build & compilation, report finalization |
-| **Youssef Mohamed Amin** | **Experiment 1 training & evaluation (callbacks, training loop, model saving, confusion matrix), report finalization** |
-| Ahmed Mohamed Saad | Experiment 2 (Improved CNN) implementation, training, confusion matrix, classification report |
-| Mohamed Ehab Abdelnaby | Experiment 3 (MobileNetV2) model creation, training, metrics, final confusion matrix |
 
 ## Overview
 
